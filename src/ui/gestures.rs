@@ -1,5 +1,6 @@
 use super::controls::{self, Control};
-use android_activity::input::{InputStatus, MotionAction, MotionEvent};
+use android_activity::input::{MotionAction, MotionEvent};
+use android_activity::InputStatus;
 use std::time::Instant;
 
 #[derive(Debug)]

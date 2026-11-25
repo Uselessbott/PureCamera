@@ -11,8 +11,8 @@ mod image;
 mod render;
 mod ui;
 
-use android_activity::input::{InputEvent, InputStatus};
-use android_activity::{AndroidApp, MainEvent, PollEvent};
+use android_activity::input::InputEvent;
+use android_activity::{AndroidApp, InputStatus, MainEvent, PollEvent};
 use android::permissions::PermissionState;
 use android::{JniBridge, PermissionController};
 use camera::{CameraController, CaptureQueue};

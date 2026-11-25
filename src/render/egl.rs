@@ -3,11 +3,11 @@ use std::ptr;
 
 type EglDisplay = *mut c_void;
 type EglConfig = *mut c_void;
-type EglContext = *mut c_void;
+type EglContextHandle = *mut c_void;
 type EglSurface = *mut c_void;
 
 const EGL_DEFAULT_DISPLAY: EglDisplay = ptr::null_mut();
-const EGL_NO_CONTEXT: EglContext = ptr::null_mut();
+const EGL_NO_CONTEXT: EglContextHandle = ptr::null_mut();
 const EGL_NO_SURFACE: EglSurface = ptr::null_mut();
 const EGL_RENDERABLE_TYPE: i32 = 0x3040;
 const EGL_OPENGL_ES2_BIT: i32 = 0x0004;
@@ -30,9 +30,9 @@ extern "C" {
     fn eglCreateContext(
         display: EglDisplay,
         config: EglConfig,
-        share: EglContext,
+        share: EglContextHandle,
         attributes: *const i32,
-    ) -> EglContext;
+    ) -> EglContextHandle;
     fn eglCreateWindowSurface(
         display: EglDisplay,
         config: EglConfig,
@@ -43,18 +43,18 @@ extern "C" {
         display: EglDisplay,
         draw: EglSurface,
         read: EglSurface,
-        context: EglContext,
+        context: EglContextHandle,
     ) -> u32;
     fn eglSwapBuffers(display: EglDisplay, surface: EglSurface) -> u32;
     fn eglDestroySurface(display: EglDisplay, surface: EglSurface) -> u32;
-    fn eglDestroyContext(display: EglDisplay, context: EglContext) -> u32;
+    fn eglDestroyContext(display: EglDisplay, context: EglContextHandle) -> u32;
     fn eglTerminate(display: EglDisplay) -> u32;
 }
 
 pub struct EglContext {
     display: EglDisplay,
     config: EglConfig,
-    context: EglContext,
+    context: EglContextHandle,
     surface: EglSurface,
 }
 

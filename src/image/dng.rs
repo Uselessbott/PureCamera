@@ -6,7 +6,7 @@
 //! use high-quality native JPEG instead; a JPEG is never presented as raw.
 
 use super::{CaptureFormat, CapturedImage};
-use crate::camera::characteristics::Capabilities;
+use crate::camera::Capabilities;
 
 const TYPE_BYTE: u16 = 1;
 const TYPE_ASCII: u16 = 2;
