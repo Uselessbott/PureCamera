@@ -36,6 +36,10 @@ jobs:
       - name: Set up Android SDK tools
         uses: android-actions/setup-android@v3
         with:
+          # `tools` was removed from the SDK repository. Install only the
+          # explicit packages needed below instead of the action's default
+          # `tools platform-tools` set.
+          packages: ''
           log-accepted-android-sdk-licenses: false
 
       - name: Install Android SDK packages
