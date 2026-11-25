@@ -20,7 +20,7 @@ env:
 
 jobs:
   build:
-    name: Build all Rust ABIs and unsigned release APK
+    name: Build all Rust ABIs and debug + unsigned release APKs
     runs-on: ubuntu-latest
 
     steps:
@@ -106,11 +106,23 @@ jobs:
             fi
           done
 
+      - name: Assemble installable debug APK
+        working-directory: android
+        run: gradle assembleDebug --no-daemon --stacktrace
+
       - name: Assemble unsigned release APK
         working-directory: android
         run: gradle assembleRelease --no-daemon --stacktrace
 
-      - name: Upload release APK
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: purecamera-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload unsigned release APK
         uses: actions/upload-artifact@v4
         with:
           name: purecamera-unsigned-release

@@ -71,18 +71,20 @@ present before packaging:
 cargo install cargo-ndk
 rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
 cargo android
-cd android && gradle assembleRelease
+cd android && gradle assembleDebug
 ```
 
 For a single ABI during local development, override the guard:
 
 ```sh
 cargo android-arm64
-cd android && gradle assembleRelease -PpureCameraAbis=arm64-v8a
+cd android && gradle assembleDebug -PpureCameraAbis=arm64-v8a
 ```
 
-Release builds are never debug-signed. To produce a signed release, provide all
-four signing properties:
+`assembleDebug` produces a debug-signed APK that can be installed directly with
+`adb install`. The unsigned release APK is not installable; CI uploads it only
+as an artifact for later signing. Release builds are never debug-signed. To
+produce a signed release, provide all four signing properties:
 
 ```sh
 gradle assembleRelease \
