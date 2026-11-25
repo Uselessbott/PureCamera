@@ -304,7 +304,7 @@ impl CameraController {
         let focus = self.focus;
         let rotation = device_rotation.rem_euclid(360);
 
-        let mut request = device.create_request(ACameraDevice_request_template::TEMPLATE_STILL_CAPTURE)?;
+        let request = device.create_request(ACameraDevice_request_template::TEMPLATE_STILL_CAPTURE)?;
         let mut target = MaybeUninit::<*mut ndk_sys::ACameraOutputTarget>::uninit();
         if let Err(error) = status(unsafe {
             ndk_sys::ACameraOutputTarget_create(target_window, target.as_mut_ptr())

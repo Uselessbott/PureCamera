@@ -45,10 +45,12 @@ pub struct PreviewRenderer {
 impl PreviewRenderer {
     pub fn new(jni: &JniBridge, window: &NativeWindow) -> Result<Self, String> {
         let egl = EglContext::new(window.ptr().as_ptr() as *mut c_void)?;
-        let surface_resources = jni.create_surface_resources()?;
+        let surface_resources = jni
+            .create_surface_resources()
+            .map_err(|error| error.to_string())?;
 
         let native_window = unsafe {
-            let guard = jni.attach()?;
+            let guard = jni.attach().map_err(|error| error.to_string())?;
             let env = guard.get_raw() as *mut jni::sys::JNIEnv;
             ndk_sys::ANativeWindow_fromSurface(
                 env as *mut _,
