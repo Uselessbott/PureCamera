@@ -1,0 +1,91 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Release must never be signed with the debug key. Supply all four values via
+// -P or environment variables to get a signed release; otherwise the release
+// output is intentionally unsigned.
+def releaseKeystore = findProperty('RELEASE_STORE_FILE') ?: System.getenv('RELEASE_STORE_FILE')
+def releaseStorePassword = findProperty('RELEASE_STORE_PASSWORD') ?: System.getenv('RELEASE_STORE_PASSWORD')
+def releaseKeyAlias = findProperty('RELEASE_KEY_ALIAS') ?: System.getenv('RELEASE_KEY_ALIAS')
+def releaseKeyPassword = findProperty('RELEASE_KEY_PASSWORD') ?: System.getenv('RELEASE_KEY_PASSWORD')
+def releaseValues = [releaseKeystore, releaseStorePassword, releaseKeyAlias, releaseKeyPassword]
+def hasAnyReleaseValue = releaseValues.any { it != null && !it.toString().isEmpty() }
+def hasAllReleaseValues = releaseValues.every { it != null && !it.toString().isEmpty() }
+if (hasAnyReleaseValue && !hasAllReleaseValues) {
+    throw new GradleException(
+        'Release signing requires RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, ' +
+        'RELEASE_KEY_ALIAS and RELEASE_KEY_PASSWORD together.')
+}
+
+// Defaults match the three targets in `.cargo/config.toml`. Override for a
+// single-ABI local build with -PpureCameraAbis=arm64-v8a.
+def abiSetting = findProperty('pureCameraAbis') ?: System.getenv('PURE_CAMERA_ABIS') ?: 'arm64-v8a,armeabi-v7a,x86_64'
+def requiredAbis = abiSetting.toString().split(',').collect { it.trim() }.findAll { !it.isEmpty() }
+
+android {
+    namespace 'dev.purecamera.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'dev.purecamera.app'
+        // API 29+ permits MediaStore image insertion with RELATIVE_PATH and no
+        // WRITE_EXTERNAL_STORAGE permission. Keeps the permission set minimal.
+        minSdk 29
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+
+    signingConfigs {
+        release {
+            if (hasAllReleaseValues) {
+                storeFile file(releaseKeystore)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (hasAllReleaseValues) {
+                signingConfig signingConfigs.release
+            }
+            // No signingConfig here means unsigned, never debug-signed.
+        }
+    }
+
+    // The application code is entirely in the Rust cdylib produced by cargo-ndk.
+    // No Java/Kotlin sourceSets are declared.
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Guard against packaging an APK that is missing any intended Rust ABI.
+tasks.register('verifyNativeLibrary') {
+    doLast {
+        def missing = requiredAbis.findAll { abi ->
+            !file("src/main/jniLibs/${abi}/libpure_camera.so").isFile()
+        }
+        if (!missing.isEmpty()) {
+            throw new GradleException(
+                "Missing libpure_camera.so for ABI(s): ${missing.join(', ')}. " +
+                'Run `cargo android` (or override with -PpureCameraAbis=... for local builds).')
+        }
+    }
+}
+
+tasks.named('preBuild') {
+    dependsOn 'verifyNativeLibrary'
+}
