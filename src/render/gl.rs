@@ -1,6 +1,6 @@
 //! Tiny hand-written GLES2 binding. No additional graphics crate is needed.
 
-use std::ffi::c_void;
+use std::ffi::{c_char, c_void};
 use std::ptr;
 
 pub const GL_TEXTURE_2D: u32 = 0x0de1;
@@ -57,7 +57,7 @@ extern "C" {
     );
 
     pub fn glCreateShader(kind: u32) -> u32;
-    pub fn glShaderSource(shader: u32, count: i32, source: *const *const i8, length: *const i32);
+    pub fn glShaderSource(shader: u32, count: i32, source: *const *const c_char, length: *const i32);
     pub fn glCompileShader(shader: u32);
     pub fn glGetShaderiv(shader: u32, parameter: u32, value: *mut i32);
     pub fn glDeleteShader(shader: u32);
@@ -68,8 +68,8 @@ extern "C" {
     pub fn glGetProgramiv(program: u32, parameter: u32, value: *mut i32);
     pub fn glUseProgram(program: u32);
     pub fn glDeleteProgram(program: u32);
-    pub fn glGetUniformLocation(program: u32, name: *const i8) -> i32;
-    pub fn glGetAttribLocation(program: u32, name: *const i8) -> i32;
+    pub fn glGetUniformLocation(program: u32, name: *const c_char) -> i32;
+    pub fn glGetAttribLocation(program: u32, name: *const c_char) -> i32;
     pub fn glUniformMatrix4fv(location: i32, count: i32, transpose: u8, value: *const f32);
     pub fn glUniform1i(location: i32, value: i32);
     pub fn glUniform4f(location: i32, x: f32, y: f32, z: f32, w: f32);

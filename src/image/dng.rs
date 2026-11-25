@@ -254,7 +254,7 @@ fn cfa_pattern(arrangement: i32) -> [u8; 4] {
 fn black_levels(caps: &Capabilities) -> [(u32, u32); 4] {
     let mut result = [(0u32, 1u32); 4];
     for (index, level) in caps.black_level_pattern.iter().enumerate().take(4) {
-        result[index] = (level.max(0) as u32, 1);
+        result[index] = ((*level).max(0) as u32, 1);
     }
     result
 }

@@ -78,7 +78,7 @@ impl CallbackContext {
         }
     }
 
-    fn mark_error(&self) {
+    pub fn mark_error(&self) {
         if self.is_current() {
             self.state.error.store(true, Ordering::Release);
         }
