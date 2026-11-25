@@ -89,7 +89,7 @@ jobs:
       - name: Build libpure_camera.so for all ABIs
         run: |
           cargo ndk \
-            -p 29 \
+            --platform 29 \
             -t arm64-v8a \
             -t armeabi-v7a \
             -t x86_64 \
