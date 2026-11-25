@@ -4,11 +4,9 @@ use super::error::{media, status, CameraError, Result};
 use crate::config;
 use crate::image::{CaptureFormat, CapturedImage};
 use ndk_sys::{
-    ACameraCaptureSession, ACameraCaptureSession_captureCallback_failed,
-    ACameraCaptureSession_captureCallbacks, ACameraCaptureSession_stateCallback,
+    ACameraCaptureSession, ACameraCaptureSession_captureCallbacks,
     ACameraCaptureSession_stateCallbacks, ACameraOutputTarget, ACaptureSessionOutput,
-    ACaptureSessionOutputContainer, AImage, AImageReader, AImageReader_ImageCallback,
-    AImageReader_ImageListener, ANativeWindow,
+    ACaptureSessionOutputContainer, AImageReader, AImageReader_ImageListener, ANativeWindow,
 };
 use std::collections::VecDeque;
 use std::ffi::c_void;
@@ -77,7 +75,7 @@ impl ImageReader {
         let context = Box::new(ReaderContext { data: data.clone(), format });
         let mut listener = Box::new(AImageReader_ImageListener {
             context: (&*context as *const ReaderContext) as *mut c_void,
-            onImageAvailable: Some(on_image_available as AImageReader_ImageCallback),
+            onImageAvailable: Some(on_image_available),
         });
         if let Err(error) = media(unsafe {
             ndk_sys::AImageReader_setImageListener(ptr, &mut *listener)
@@ -181,7 +179,7 @@ impl CaptureCallbacks {
                 onCaptureStarted: None,
                 onCaptureProgressed: None,
                 onCaptureCompleted: None,
-                onCaptureFailed: Some(on_capture_failed as ACameraCaptureSession_captureCallback_failed),
+                onCaptureFailed: Some(on_capture_failed),
                 onCaptureSequenceCompleted: None,
                 onCaptureSequenceAborted: None,
                 onCaptureBufferLost: None,
@@ -323,7 +321,7 @@ impl Session {
         callbacks.set_context(context_ptr);
         let state_callbacks = Box::new(ACameraCaptureSession_stateCallbacks {
             context: context_ptr,
-            onClosed: Some(on_session_state as ACameraCaptureSession_stateCallback),
+            onClosed: Some(on_session_state),
             onReady: None,
             onActive: None,
         });

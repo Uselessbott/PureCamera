@@ -1,8 +1,7 @@
 use super::error::{status, CameraError, Result};
 use super::manager::CameraManager;
 use ndk_sys::{
-    ACameraDevice, ACameraDevice_StateCallback, ACameraDevice_StateCallbacks,
-    ACameraDevice_ErrorStateCallback, ACameraDevice_request_template, ACaptureRequest,
+    ACameraDevice, ACameraDevice_StateCallbacks, ACameraDevice_request_template, ACaptureRequest,
 };
 use std::ffi::{c_void, CStr};
 use std::mem::MaybeUninit;
@@ -105,8 +104,8 @@ impl Device {
         let context = Box::new(CallbackContext::new(state, generation));
         let mut callbacks = Box::new(ACameraDevice_StateCallbacks {
             context: context.as_ptr(),
-            onDisconnected: Some(on_disconnected as ACameraDevice_StateCallback),
-            onError: Some(on_error as ACameraDevice_ErrorStateCallback),
+            onDisconnected: Some(on_disconnected),
+            onError: Some(on_error),
         });
         let mut device = MaybeUninit::<*mut ACameraDevice>::uninit();
         status(unsafe {

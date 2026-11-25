@@ -146,7 +146,7 @@ impl UiRenderer {
         let x1 = ndc_x(x + width);
         let y1 = ndc_y(y);
         self.upload(&[x0, y0, x1, y0, x0, y1, x1, y1]);
-        self.draw(gl::GL_TRIANGLE_STRIP, 4, colour);
+        self.draw_primitive(gl::GL_TRIANGLE_STRIP, 4, colour);
     }
 
     fn circle(&self, cx: f32, cy: f32, radius: f32, colour: [f32; 4]) {
@@ -160,12 +160,12 @@ impl UiRenderer {
             vertices.push(ndc_y(cy + radius * angle.sin()));
         }
         self.upload(&vertices);
-        self.draw(gl::GL_TRIANGLE_FAN, (segments + 2) as i32, colour);
+        self.draw_primitive(gl::GL_TRIANGLE_FAN, (segments + 2) as i32, colour);
     }
 
     fn triangle(&self, x0: f32, y0: f32, x1: f32, y1: f32, x2: f32, y2: f32, colour: [f32; 4]) {
         self.upload(&[ndc_x(x0), ndc_y(y0), ndc_x(x1), ndc_y(y1), ndc_x(x2), ndc_y(y2)]);
-        self.draw(gl::GL_TRIANGLES, 3, colour);
+        self.draw_primitive(gl::GL_TRIANGLES, 3, colour);
     }
 
     fn line(&self, x0: f32, y0: f32, x1: f32, y1: f32, thickness: f32, colour: [f32; 4]) {
@@ -183,7 +183,7 @@ impl UiRenderer {
             ndc_x(x0 - nx), ndc_y(y0 - ny),
             ndc_x(x1 - nx), ndc_y(y1 - ny),
         ]);
-        self.draw(gl::GL_TRIANGLE_STRIP, 4, colour);
+        self.draw_primitive(gl::GL_TRIANGLE_STRIP, 4, colour);
     }
 
     fn upload(&self, vertices: &[f32]) {
@@ -197,7 +197,7 @@ impl UiRenderer {
         }
     }
 
-    fn draw(&self, mode: u32, count: i32, colour: [f32; 4]) {
+    fn draw_primitive(&self, mode: u32, count: i32, colour: [f32; 4]) {
         unsafe {
             gl::glUniform4f(self.color, colour[0], colour[1], colour[2], colour[3]);
             gl::glDrawArrays(mode, 0, count);

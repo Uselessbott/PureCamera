@@ -283,22 +283,20 @@ impl CameraController {
     pub fn capture(&mut self, format: CaptureFormat, device_rotation: i32) -> Result<()> {
         // Copy raw pointers and shared references first so no long-lived Rust
         // borrow of `self` overlaps the mutable borrow of the callbacks.
+        let device = self
+            .device
+            .as_ref()
+            .ok_or(CameraError::NotSupported("camera not open"))?;
         let session = self
             .session
             .as_ref()
             .ok_or(CameraError::NotSupported("session not ready"))?;
-        let device_ptr = self
-            .device
-            .as_ref()
-            .ok_or(CameraError::NotSupported("camera not open"))?
-            .as_ptr();
         let session_ptr = session.ptr();
         let target_window = session
             .reader_window(format)
             .ok_or(CameraError::NotSupported("capture format"))?;
         let callbacks_ptr = self.capture_callbacks.as_mut();
 
-        let device = unsafe { &*device_ptr };
         let caps = &self.caps;
         let flash = self.flash;
         let exposure = self.exposure_steps;
@@ -363,15 +361,12 @@ impl CameraController {
         zoom: f32,
         focus: FocusPoint,
     ) -> Result<()> {
-        let (device_ptr, session_ptr, preview_target) = match (&self.device, &self.session) {
-            (Some(device), Some(session)) => {
-                (device.as_ptr(), session.ptr(), session.preview_target())
-            }
+        let (device, session_ptr, preview_target) = match (&self.device, &self.session) {
+            (Some(device), Some(session)) => (device, session.ptr(), session.preview_target()),
             _ => return Ok(()),
         };
 
         let previous = self.preview_request.take();
-        let device = unsafe { &*device_ptr };
         let caps = &self.caps;
         let request = match device.create_request(ACameraDevice_request_template::TEMPLATE_PREVIEW) {
             Ok(request) => request,
